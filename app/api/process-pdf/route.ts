@@ -1,7 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-// pdf-parse is CJS; use require to avoid ESM default export issue
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const pdfParse = require('pdf-parse') as (buf: Buffer) => Promise<{ text: string; numpages: number }>;
 import OpenAI from 'openai';
 
 export const maxDuration = 60;
@@ -44,6 +41,11 @@ export async function POST(req: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
+
+    // Dynamic import avoids CJS/ESM require() conflict in App Router
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const pdfMod = await import('pdf-parse') as any;
+    const pdfParse: (b: Buffer) => Promise<{ text: string; numpages: number }> = pdfMod.default ?? pdfMod;
     const pdfData = await pdfParse(buffer);
     const { text, numpages } = pdfData;
 
