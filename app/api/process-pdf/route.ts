@@ -42,9 +42,9 @@ export async function POST(req: NextRequest) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    // Dynamic import avoids CJS/ESM require() conflict in App Router
+    // pdf-parse/node is the Node.js-specific build; avoids DOMMatrix and other browser-only APIs
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const pdfMod = await import('pdf-parse') as any;
+    const pdfMod = await import('pdf-parse/node') as any;
     const pdfParse: (b: Buffer) => Promise<{ text: string; numpages: number }> = pdfMod.default ?? pdfMod;
     const pdfData = await pdfParse(buffer);
     const { text, numpages } = pdfData;
